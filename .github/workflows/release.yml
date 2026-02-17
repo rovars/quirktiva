@@ -48,12 +48,51 @@ jobs:
         run: |
           go test ./...
 
-      - name: Build
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Setup NDK
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r27b
+
+      - name: Build for Android ARM64
         env:
           NAME: quirktiva
           BINDIR: bin
-        run: make -j $(go run ./test/main.go) releases
+          GOOS: android
+          GOARCH: arm64
+          CGO_ENABLED: 1
+        run: |
+          COMMIT_SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
+          VERSION=$(git describe --tags --always || echo "unknown version")
+          BUILDTIME=$(date -u +'%FT%TZ')
+          CC=${{steps.setup-ndk.outputs.ndk-path}}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android34-clang \
+          go build -v -trimpath -tags nogvisor,nohy2 -ldflags "-X \"github.com/yaling888/quirktiva/constant.Version=${VERSION}\" -X \"github.com/yaling888/quirktiva/constant.BuildTime=${BUILDTIME}\" -w -s -buildid=" -o bin/quirktiva-android-arm64
+          mv bin/quirktiva-android-arm64 bin/quirktiva-android-arm64-${COMMIT_SHA_SHORT}
+          gzip -f bin/quirktiva-android-arm64-${COMMIT_SHA_SHORT}
+
+      - name: Build for Android ARM
+        env:
+          NAME: quirktiva
+          BINDIR: bin
+          GOOS: android
+          GOARCH: arm
+          CGO_ENABLED: 1
+        run: |
+          COMMIT_SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
+          VERSION=$(git describe --tags --always || echo "unknown version")
+          BUILDTIME=$(date -u +'%FT%TZ')
+          CC=${{steps.setup-ndk.outputs.ndk-path}}/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi34-clang \
+          go build -v -trimpath -tags nogvisor,nohy2 -ldflags "-X \"github.com/yaling888/quirktiva/constant.Version=${VERSION}\" -X \"github.com/yaling888/quirktiva/constant.BuildTime=${BUILDTIME}\" -w -s -buildid=" -o bin/quirktiva-android-arm
+          mv bin/quirktiva-android-arm bin/quirktiva-android-arm-${COMMIT_SHA_SHORT}
+          gzip -f bin/quirktiva-android-arm-${COMMIT_SHA_SHORT}
+
+      - name: Send to Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          COMMIT_SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
+          python3 .github/send_telegram.py bin/quirktiva-android-arm64-${COMMIT_SHA_SHORT}.gz bin/quirktiva-android-arm-${COMMIT_SHA_SHORT}.gz
 
       #- name: Prepare upload
       #  run: |
