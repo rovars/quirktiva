@@ -342,8 +342,8 @@ func Parse(buf []byte) (*Config, error) {
 func UnmarshalRawConfig(buf []byte) (*RawConfig, error) {
 	// config with default value
 	rawCfg := &RawConfig{
-		AllowLan:        false,
-		Sniffing:        false,
+		AllowLan:        true,
+		Sniffing:        true,
 		ForceCertVerify: false,
 		BindAddress:     "*",
 		Mode:            T.Rule,
@@ -379,14 +379,14 @@ func UnmarshalRawConfig(buf []byte) (*RawConfig, error) {
 			AutoRedir:     []string{},
 		},
 		DNS: RawDNS{
-			Enable:           false,
+			Enable:           true,
 			UseHosts:         true,
 			RemoteDnsResolve: true,
 			FakeIPRange:      "198.18.0.1/16",
 			FakeIPRange6:     "6663:6b71:7569:726b::1/64",
 			FallbackFilter: RawFallbackFilter{
-				GeoIP:     true,
-				GeoIPCode: "CN",
+				GeoIP:     false,
+				GeoIPCode: "",
 				IPCIDR:    []string{},
 				GeoSite:   []string{},
 			},
