@@ -25,6 +25,7 @@ const (
 	Trojan
 	WireGuard
 	Hysteria2
+	ZIVPN
 
 	Relay
 	Selector
@@ -160,6 +161,8 @@ func (at AdapterType) String() string {
 		return "WireGuard"
 	case Hysteria2:
 		return "Hysteria2"
+	case ZIVPN:
+		return "ZIVPN"
 
 	case Relay:
 		return "Relay"

@@ -230,6 +230,21 @@ func ParseProxy(mapping map[string]any, option ProxyOption) (C.Proxy, error) {
 			hysteria2Option.RemoteDnsResolve = false
 		}
 		proxy, err = outbound.NewHysteria2(*hysteria2Option)
+	case "zivpn":
+		zivpnOption := &outbound.ZIVPNOption{
+			UDP: true,
+		}
+		err = decoder.Decode(mapping, zivpnOption)
+		if err != nil {
+			break
+		}
+		if option.ForceUDP {
+			zivpnOption.UDP = true
+		}
+		if option.DisableUDP {
+			zivpnOption.UDP = false
+		}
+		proxy, err = outbound.NewZIVPN(*zivpnOption)
 	default:
 		return nil, fmt.Errorf("unsupport proxy type: %s", proxyType)
 	}

@@ -216,3 +216,19 @@ func formatJson(logLevel LogLevel, p []byte) {
 
 //go:linkname parseFormatterArgs github.com/phuslu/log.parseFormatterArgs
 func parseFormatterArgs(_ []byte, _ *logger.FormatterArgs)
+
+func Infoln(format string, v ...any) {
+	logger.Info().Msgf(format, v...)
+}
+
+func Warnln(format string, v ...any) {
+	logger.Warn().Msgf(format, v...)
+}
+
+func Errorln(format string, v ...any) {
+	logger.Error().Msgf(format, v...)
+}
+
+func Debugln(format string, v ...any) {
+	logger.Debug().Msgf(format, v...)
+}
