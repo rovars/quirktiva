@@ -35,7 +35,7 @@ func pipeLog(rc io.ReadCloser) {
 
 // StartInstance starts a ZIVPN cluster and returns the listening port, a cleanup function, and error
 // It ensures only one instance is running globally.
-func StartInstance(homeDir, name, host, portRange, password, obfs string, workers int, recvWindowConn, recvWindow int, udpEnabled bool) (int, func(), error) {
+func StartInstance(homeDir, name, host, portRange, password, obfs string, workers int, recvWindowConn, recvWindow int, udpEnabled bool, up string, upMbps int, down string, downMbps int) (int, func(), error) {
 	instanceMu.Lock()
 	defer instanceMu.Unlock()
 
@@ -146,10 +146,29 @@ func StartInstance(homeDir, name, host, portRange, password, obfs string, worker
 		}
 	}
 
+	// Build bandwidth part of the JSON
+	var bwParts []string
+	if up != "" {
+		bwParts = append(bwParts, fmt.Sprintf(`"up": "%s"`, up))
+	} else if upMbps > 0 {
+		bwParts = append(bwParts, fmt.Sprintf(`"up_mbps": %d`, upMbps))
+	}
+
+	if down != "" {
+		bwParts = append(bwParts, fmt.Sprintf(`"down": "%s"`, down))
+	} else if downMbps > 0 {
+		bwParts = append(bwParts, fmt.Sprintf(`"down_mbps": %d`, downMbps))
+	}
+
+	var bandwidthJSON string
+	if len(bwParts) > 0 {
+		bandwidthJSON = fmt.Sprintf(`, "bandwidth": {%s}`, strings.Join(bwParts, ", "))
+	}
+
 	for i, port := range workerPorts {
-		// Construct Config JSON exactly as the stable version
-		config := fmt.Sprintf(`{"server":"%s","obfs":"%s","auth":"%s","socks5":{"listen":"127.0.0.1:%d","disable_udp":%t},"insecure":true,"recvwindowconn":%d,"recvwindow":%d}`,
-			serverAddr, obfs, password, port, !udpEnabled, recvWindowConn, recvWindow)
+		// Construct Config JSON
+		config := fmt.Sprintf(`{"server":"%s","obfs":"%s","auth":"%s","socks5":{"listen":"127.0.0.1:%d","disable_udp":%t},"insecure":true,"recvwindowconn":%d,"recvwindow":%d%s}`,
+			serverAddr, obfs, password, port, !udpEnabled, recvWindowConn, recvWindow, bandwidthJSON)
 
 		// Put back the -s flag which is likely mandatory for the binary's parser
 		cmd := exec.Command(libuzPath, "-s", obfs, "--config", config)

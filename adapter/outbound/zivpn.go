@@ -22,11 +22,15 @@ type ZIVPNOption struct {
 	UDP            bool   `proxy:"udp,omitempty"`
 	RecvWindowConn int    `proxy:"recv-window-conn,omitempty"`
 	RecvWindow     int    `proxy:"recv-window,omitempty"`
+	Up             string `proxy:"up,omitempty"`
+	UpMbps         int    `proxy:"up-mbps,omitempty"`
+	Down           string `proxy:"down,omitempty"`
+	DownMbps       int    `proxy:"down-mbps,omitempty"`
 }
 
 func NewZIVPN(option ZIVPNOption) (*ZIVPN, error) {
 	// Start ZIVPN Instance
-	port, cleanup, err := zivpn.StartInstance(constant.Path.HomeDir(), option.Name, option.Server, option.Port, option.Password, option.Obfs, option.Workers, option.RecvWindowConn, option.RecvWindow, option.UDP)
+	port, cleanup, err := zivpn.StartInstance(constant.Path.HomeDir(), option.Name, option.Server, option.Port, option.Password, option.Obfs, option.Workers, option.RecvWindowConn, option.RecvWindow, option.UDP, option.Up, option.UpMbps, option.Down, option.DownMbps)
 	if err != nil {
 		return nil, fmt.Errorf("zivpn start error: %w", err)
 	}
