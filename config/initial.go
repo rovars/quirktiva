@@ -9,7 +9,6 @@ import (
 	"github.com/phuslu/log"
 
 	"github.com/yaling888/quirktiva/common/convert"
-	"github.com/yaling888/quirktiva/component/mmdb"
 	C "github.com/yaling888/quirktiva/constant"
 )
 
@@ -31,26 +30,6 @@ func downloadMMDB(path string) (err error) {
 }
 
 func initMMDB() error {
-	if _, err := os.Stat(C.Path.MMDB()); os.IsNotExist(err) {
-		log.Info().Msg("[Config] can't find MMDB, start download")
-		if err := downloadMMDB(C.Path.MMDB()); err != nil {
-			return fmt.Errorf("can't download MMDB: %w", err)
-		}
-		log.Info().Msg("[Config] download MMDB finish")
-	}
-
-	if !mmdb.Verify() {
-		log.Info().Msg("[Config] invalid MMDB, remove and download")
-		if err := os.Remove(C.Path.MMDB()); err != nil {
-			return fmt.Errorf("can't remove invalid MMDB: %w", err)
-		}
-
-		if err := downloadMMDB(C.Path.MMDB()); err != nil {
-			return fmt.Errorf("can't download MMDB: %w", err)
-		}
-		log.Info().Msg("[Config] download MMDB finish")
-	}
-
 	return nil
 }
 
@@ -72,26 +51,6 @@ func downloadGeoSite(path string) (err error) {
 }
 
 func initGeoSite() error {
-	if _, err := os.Stat(C.Path.GeoSite()); os.IsNotExist(err) {
-		log.Info().Msg("[Config] can't find GeoSite.dat, start download")
-		if err := downloadGeoSite(C.Path.GeoSite()); err != nil {
-			return fmt.Errorf("can't download GeoSite.dat: %w", err)
-		}
-		log.Info().Msg("[Config] download GeoSite.dat finish")
-	}
-
-	if err := verifyGeoSite(C.Path.GeoSite()); err != nil {
-		log.Info().Msg("[Config] invalid GeoSite.dat, remove and download")
-		if err := os.Remove(C.Path.GeoSite()); err != nil {
-			return fmt.Errorf("can't remove invalid GeoSite.dat: %w", err)
-		}
-
-		if err := downloadGeoSite(C.Path.GeoSite()); err != nil {
-			return fmt.Errorf("can't download GeoSite.dat: %w", err)
-		}
-		log.Info().Msg("[Config] download GeoSite.dat finish")
-	}
-
 	return nil
 }
 

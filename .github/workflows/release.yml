@@ -48,12 +48,31 @@ jobs:
         run: |
           go test ./...
 
-      - name: Build
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Build for Android ARM64
         env:
           NAME: quirktiva
           BINDIR: bin
-        run: make -j $(go run ./test/main.go) releases
+        run: |
+          COMMIT_SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
+          make android-arm64
+          FILE_NAME="quirktiva-android-arm64-${COMMIT_SHA_SHORT}.gz"
+          gzip -c bin/quirktiva-android-arm64 > bin/${FILE_NAME}
+          echo "UPLOAD_FILE=bin/${FILE_NAME}" >> $GITHUB_ENV
+
+      - name: Send to Telegram
+        env:
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          git fetch origin plus --depth=4
+          echo "<code>" > caption.txt
+          git log -n 4 --pretty=format:"— %s" >> caption.txt
+          echo "</code>" >> caption.txt
+          curl -v -F "chat_id=${CHAT_ID}" \
+                  -F "document=@$GITHUB_WORKSPACE/$UPLOAD_FILE" \
+                  -F "caption=<caption.txt" \
+                  -F "parse_mode=HTML" \
+                  "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument"
 
       #- name: Prepare upload
       #  run: |

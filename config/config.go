@@ -385,8 +385,8 @@ func UnmarshalRawConfig(buf []byte) (*RawConfig, error) {
 			FakeIPRange:      "198.18.0.1/16",
 			FakeIPRange6:     "6663:6b71:7569:726b::1/64",
 			FallbackFilter: RawFallbackFilter{
-				GeoIP:     true,
-				GeoIPCode: "CN",
+				GeoIP:     false,
+				GeoIPCode: "",
 				IPCIDR:    []string{},
 				GeoSite:   []string{},
 			},

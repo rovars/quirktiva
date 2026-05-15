@@ -34,7 +34,8 @@ PLATFORM_LIST = \
 	freebsd-386 \
 	freebsd-amd64 \
 	freebsd-amd64-v3 \
-	freebsd-arm64
+	freebsd-arm64 \
+	android-arm64
 
 WINDOWS_ARCH_LIST = \
 	windows-386 \
@@ -139,6 +140,9 @@ freebsd-amd64-v3:
 
 freebsd-arm64:
 	GOARCH=arm64 GOOS=freebsd $(GOBUILD) -o $(BINDIR)/$(NAME)-$@
+
+android-arm64:
+	GOARCH=arm64 GOOS=android $(GOBUILD) -o $(BINDIR)/$(NAME)-$@
 
 windows-386:
 	GOARCH=386 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)-$@.exe
